@@ -18,6 +18,8 @@ from random import randint, shuffle
 
 import torch
 
+import functools
+
 try:
     import intel_extension_for_pytorch as ipex  # pylint: disable=import-error, unused-import
 
@@ -29,9 +31,17 @@ try:
         GradScaler = gradscaler_init()
         ipex_init()
     else:
-        from torch.cuda.amp import GradScaler, autocast
+        from torch.amp import GradScaler as _GradScaler
+        from torch.amp import autocast as _autocast
+
+        GradScaler = functools.partial(_GradScaler, "cuda")
+        autocast = functools.partial(_autocast, "cuda")
 except Exception:
-    from torch.cuda.amp import GradScaler, autocast
+    from torch.amp import GradScaler as _GradScaler
+    from torch.amp import autocast as _autocast
+
+    GradScaler = functools.partial(_GradScaler, "cuda")
+    autocast = functools.partial(_autocast, "cuda")
 
 torch.backends.cudnn.deterministic = False
 torch.backends.cudnn.benchmark = False

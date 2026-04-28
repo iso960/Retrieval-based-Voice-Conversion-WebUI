@@ -1,3 +1,4 @@
+import ast
 import os
 import sys
 from dotenv import load_dotenv
@@ -120,14 +121,11 @@ else:
 gpus = "-".join([i[0] for i in gpu_infos])
 
 
-class ToolButton(gr.Button, gr.components.FormComponent):
+class ToolButton(gr.Button):
     """Small button with single emoji as text, fits inside gradio forms"""
 
     def __init__(self, **kwargs):
         super().__init__(variant="tool", **kwargs)
-
-    def get_block_name(self):
-        return "button"
 
 
 weight_root = os.getenv("weight_root")
@@ -651,7 +649,7 @@ def train_index(exp_dir1, version19):
                 .fit(big_npy)
                 .cluster_centers_
             )
-        except:
+        except Exception:
             info = traceback.format_exc()
             logger.info(info)
             infos.append(info)
@@ -703,7 +701,7 @@ def train_index(exp_dir1, version19):
             ),
         )
         infos.append("链接索引到外部-%s" % (outside_index_root))
-    except:
+    except Exception:
         infos.append("链接索引到外部-%s失败" % (outside_index_root))
 
     # faiss.write_index(index, '%s/added_IVF%s_Flat_FastScan_%s.index'%(exp_dir,n_ivf,version19))
@@ -786,11 +784,11 @@ def change_info_(ckpt_path):
         with open(
             ckpt_path.replace(os.path.basename(ckpt_path), "train.log"), "r"
         ) as f:
-            info = eval(f.read().strip("\n").split("\n")[0].split("\t")[-1])
+            info = ast.literal_eval(f.read().strip("\n").split("\n")[0].split("\t")[-1])
             sr, f0 = info["sample_rate"], info["if_f0"]
             version = "v2" if ("version" in info and info["version"] == "v2") else "v1"
             return sr, str(f0), version
-    except:
+    except Exception:
         traceback.print_exc()
         return {"__type__": "update"}, {"__type__": "update"}, {"__type__": "update"}
 
@@ -1605,13 +1603,13 @@ with gr.Blocks(title="RVC WebUI") as app:
                     with open("docs/en/faq_en.md", "r", encoding="utf8") as f:
                         info = f.read()
                 gr.Markdown(value=info)
-            except:
+            except Exception:
                 gr.Markdown(traceback.format_exc())
 
     if config.iscolab:
-        app.queue(concurrency_count=511, max_size=1022).launch(share=True)
+        app.queue(max_size=1022).launch(share=True)
     else:
-        app.queue(concurrency_count=511, max_size=1022).launch(
+        app.queue(max_size=1022).launch(
             server_name="0.0.0.0",
             inbrowser=not config.noautoopen,
             server_port=config.listen_port,

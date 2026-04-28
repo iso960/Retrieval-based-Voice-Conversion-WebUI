@@ -96,7 +96,7 @@ class FeatureInput(object):
                         coarse_pit,
                         allow_pickle=False,
                     )  # ori
-                except:
+                except Exception:
                     printt("f0fail-%s-%s-%s" % (idx, inp_path, traceback.format_exc()))
 
 
@@ -122,7 +122,7 @@ if __name__ == "__main__":
         paths.append([inp_path, opt_path1, opt_path2])
     try:
         featureInput.go(paths, "rmvpe")
-    except:
+    except Exception:
         printt("f0_all_fail-%s" % (traceback.format_exc()))
     # ps = []
     # for i in range(n_p):

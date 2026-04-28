@@ -40,7 +40,7 @@ def load_checkpoint_d(checkpoint_path, combd, sbd, optimizer=None, load_opt=1):
                         saved_state_dict[k].shape,
                     )  #
                     raise KeyError
-            except:
+            except Exception:
                 # logger.info(traceback.format_exc())
                 logger.info("%s is not in the checkpoint", k)  # pretrain缺失的
                 new_state_dict[k] = v  # 模型自带的随机值
@@ -118,7 +118,7 @@ def load_checkpoint(checkpoint_path, model, optimizer=None, load_opt=1):
                     saved_state_dict[k].shape,
                 )  #
                 raise KeyError
-        except:
+        except Exception:
             # logger.info(traceback.format_exc())
             logger.info("%s is not in the checkpoint", k)  # pretrain缺失的
             new_state_dict[k] = v  # 模型自带的随机值
