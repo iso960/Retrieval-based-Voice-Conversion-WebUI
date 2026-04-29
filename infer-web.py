@@ -15,7 +15,7 @@ from infer.lib.train.process_ckpt import (
     show_info,
 )
 from i18n.i18n import I18nAuto
-from configs.config import Config, TrainConfig
+from configs.config import RuntimeConfig, TrainConfig
 from sklearn.cluster import MiniBatchKMeans
 import torch, platform
 import numpy as np
@@ -51,7 +51,7 @@ warnings.filterwarnings("ignore")
 torch.manual_seed(114514)
 
 
-config = Config()
+config = RuntimeConfig()
 train_config = TrainConfig()
 vc = VC(config)
 

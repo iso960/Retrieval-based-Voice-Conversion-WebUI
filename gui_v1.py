@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     from infer.lib import rtrvc as rvc_for_realtime
     from i18n.i18n import I18nAuto
-    from configs.config import Config, RealtimeConfig
+    from configs.config import RuntimeConfig, RealtimeConfig
 
     i18n = I18nAuto()
 
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     class GUI:
         def __init__(self) -> None:
             self.gui_config = GUIConfig()
-            self.config = Config()
+            self.config = RuntimeConfig(argv=[])
             self.rt_cfg = RealtimeConfig("configs/inuse/config.json")
             self.function = "vc"
             self.delay_time = 0

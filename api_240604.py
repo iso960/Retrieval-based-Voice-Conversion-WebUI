@@ -535,7 +535,7 @@ if __name__ == "__main__":
         os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
     from tools.torchgate import TorchGate
     import tools.rvc_for_realtime as rvc_for_realtime
-    from configs.config import Config
-    audio_api.config = Config()
+    from configs.config import RuntimeConfig
+    audio_api.config = RuntimeConfig(argv=[])
     audio_api.initialize_queues()
     uvicorn.run(app, host="0.0.0.0", port=6242)

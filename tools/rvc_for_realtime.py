@@ -28,7 +28,7 @@ now_dir = os.getcwd()
 sys.path.append(now_dir)
 from multiprocessing import Manager as M
 
-from configs.config import Config
+from configs.config import RuntimeConfig
 
 # config = Config()
 
@@ -54,7 +54,7 @@ class RVC:
         n_cpu,
         inp_q,
         opt_q,
-        config: Config,
+        config: RuntimeConfig,
         last_rvc=None,
     ) -> None:
         """
