@@ -19,7 +19,7 @@ default_param["band"][1] = {
     "crop_start": 0,
     "crop_stop": 245,
     "lpf_start": 61,  # inference only
-    "res_type": "polyphase",
+    "res_type": "soxr_hq",
 }
 
 default_param["band"][2] = {
@@ -29,7 +29,7 @@ default_param["band"][2] = {
     "crop_start": 24,
     "crop_stop": 547,
     "hpf_start": 81,  # inference only
-    "res_type": "sinc_best",
+    "res_type": "soxr_hq",
 }
 
 
