@@ -5,7 +5,7 @@ import os
 import gradio as gr
 from dotenv import load_dotenv
 
-from configs.config import Config
+from configs.config import RuntimeConfig
 from i18n.i18n import I18nAuto
 from infer.modules.vc.modules import VC
 
@@ -19,7 +19,7 @@ i18n = I18nAuto()
 logger.info(i18n)
 
 load_dotenv()
-config = Config()
+config = RuntimeConfig(argv=[])
 vc = VC(config)
 
 weight_root = os.getenv("weight_root")

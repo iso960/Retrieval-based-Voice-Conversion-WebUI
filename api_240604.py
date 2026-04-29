@@ -1,7 +1,6 @@
 #api for 240604 release version by Xiaokai
 import os
 import sys
-import json
 import re
 import time
 import librosa
@@ -17,6 +16,7 @@ import threading
 import uvicorn
 import logging
 from multiprocessing import Queue, Process, cpu_count, freeze_support
+from configs.config import RealtimeConfig
 
 # Initialize the logger
 logging.basicConfig(level=logging.INFO)
@@ -98,6 +98,7 @@ class AudioAPI:
         self.inp_q = None
         self.opt_q = None
         self.n_cpu = min(cpu_count(), 8)
+        self.rt_cfg = RealtimeConfig("configs/config.json")
 
     def initialize_queues(self):
         self.inp_q = Queue()
@@ -109,35 +110,11 @@ class AudioAPI:
 
     def load(self):
         input_devices, output_devices, _, _ = self.get_devices()
-        try:
-            with open("configs/config.json", "r", encoding='utf-8') as j:
-                data = json.load(j)
-                if data["sg_input_device"] not in input_devices:
-                    data["sg_input_device"] = input_devices[sd.default.device[0]]
-                if data["sg_output_device"] not in output_devices:
-                    data["sg_output_device"] = output_devices[sd.default.device[1]]
-        except Exception as e:
-            logger.error(f"Failed to load configuration: {e}")
-            with open("configs/config.json", "w", encoding='utf-8') as j:
-                data = {
-                    "pth_path": "",
-                    "index_path": "",
-                    "sg_input_device": input_devices[sd.default.device[0]],
-                    "sg_output_device": output_devices[sd.default.device[1]],
-                    "threhold": -60,
-                    "pitch": 0,
-                    "formant": 0.0,
-                    "index_rate": 0,
-                    "rms_mix_rate": 0,
-                    "block_time": 0.25,
-                    "crossfade_length": 0.05,
-                    "extra_time": 2.5,
-                    "n_cpu": 4,
-                    "f0method": "fcpe",
-                    "use_jit": False,
-                    "use_pv": False,
-                }
-                json.dump(data, j, ensure_ascii=False)
+        data = self.rt_cfg.data
+        if data["sg_input_device"] not in input_devices:
+            data["sg_input_device"] = input_devices[sd.default.device[0]]
+        if data["sg_output_device"] not in output_devices:
+            data["sg_output_device"] = output_devices[sd.default.device[1]]
         return data
 
     def set_values(self, values):
@@ -505,8 +482,7 @@ def configure_audio(config_data: ConfigData):
         if audio_api.set_values(config_data):
             settings = config_data.dict()
             settings["use_jit"] = False
-            with open("configs/config.json", "w", encoding='utf-8') as j:
-                json.dump(settings, j, ensure_ascii=False)
+            audio_api.rt_cfg.save(settings)
             logger.info("Configuration set successfully")
             return {"message": "Configuration set successfully"}
     except HTTPException as e:

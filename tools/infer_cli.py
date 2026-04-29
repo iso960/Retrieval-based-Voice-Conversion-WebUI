@@ -7,7 +7,7 @@ sys.path.append(now_dir)
 from dotenv import load_dotenv
 from scipy.io import wavfile
 
-from configs.config import Config
+from configs.config import RuntimeConfig
 from infer.modules.vc.modules import VC
 
 ####
@@ -41,7 +41,7 @@ def arg_parse() -> tuple:
 def main():
     load_dotenv()
     args = arg_parse()
-    config = Config()
+    config = RuntimeConfig(argv=[])
     config.device = args.device if args.device else config.device
     config.is_half = args.is_half if args.is_half else config.is_half
     vc = VC(config)

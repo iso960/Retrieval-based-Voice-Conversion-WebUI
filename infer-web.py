@@ -15,7 +15,7 @@ from infer.lib.train.process_ckpt import (
     show_info,
 )
 from i18n.i18n import I18nAuto
-from configs.config import Config
+from configs.config import Config, TrainConfig
 from sklearn.cluster import MiniBatchKMeans
 import torch, platform
 import numpy as np
@@ -52,6 +52,7 @@ torch.manual_seed(114514)
 
 
 config = Config()
+train_config = TrainConfig()
 vc = VC(config)
 
 
@@ -550,15 +551,12 @@ def click_train(
         logger.info("No pretrained Generator")
     if pretrained_D15 == "":
         logger.info("No pretrained Discriminator")
-    if version19 == "v1" or sr2 == "40k":
-        config_path = "v1/%s.json" % sr2
-    else:
-        config_path = "v2/%s.json" % sr2
+    version = "v1" if (version19 == "v1" or sr2 == "40k") else "v2"
     config_save_path = os.path.join(exp_dir, "config.json")
     if not pathlib.Path(config_save_path).exists():
         with open(config_save_path, "w", encoding="utf-8") as f:
             json.dump(
-                config.json_config[config_path],
+                train_config.get(version, sr2),
                 f,
                 ensure_ascii=False,
                 indent=4,

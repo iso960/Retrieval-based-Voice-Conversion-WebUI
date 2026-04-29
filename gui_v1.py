@@ -1,7 +1,6 @@
 import os
 import sys
 from dotenv import load_dotenv
-import shutil
 
 load_dotenv()
 
@@ -92,7 +91,7 @@ if __name__ == "__main__":
 
     from infer.lib import rtrvc as rvc_for_realtime
     from i18n.i18n import I18nAuto
-    from configs.config import Config
+    from configs.config import Config, RealtimeConfig
 
     i18n = I18nAuto()
 
@@ -138,6 +137,7 @@ if __name__ == "__main__":
         def __init__(self) -> None:
             self.gui_config = GUIConfig()
             self.config = Config()
+            self.rt_cfg = RealtimeConfig("configs/inuse/config.json")
             self.function = "vc"
             self.delay_time = 0
             self.hostapis = None
@@ -150,74 +150,46 @@ if __name__ == "__main__":
             self.launcher()
 
         def load(self):
-            try:
-                if not os.path.exists("configs/inuse/config.json"):
-                    shutil.copy("configs/config.json", "configs/inuse/config.json")
-                with open("configs/inuse/config.json", "r") as j:
-                    data = json.load(j)
-                    data["sr_model"] = data["sr_type"] == "sr_model"
-                    data["sr_device"] = data["sr_type"] == "sr_device"
-                    data["pm"] = data["f0method"] == "pm"
-                    data["harvest"] = data["f0method"] == "harvest"
-                    data["crepe"] = data["f0method"] == "crepe"
-                    data["rmvpe"] = data["f0method"] == "rmvpe"
-                    data["fcpe"] = data["f0method"] == "fcpe"
-                    if data["sg_hostapi"] in self.hostapis:
-                        self.update_devices(hostapi_name=data["sg_hostapi"])
-                        if (
-                            data["sg_input_device"] not in self.input_devices
-                            or data["sg_output_device"] not in self.output_devices
-                        ):
-                            self.update_devices()
-                            data["sg_hostapi"] = self.hostapis[0]
-                            data["sg_input_device"] = self.input_devices[
-                                self.input_devices_indices.index(sd.default.device[0])
-                            ]
-                            data["sg_output_device"] = self.output_devices[
-                                self.output_devices_indices.index(sd.default.device[1])
-                            ]
-                    else:
-                        data["sg_hostapi"] = self.hostapis[0]
-                        data["sg_input_device"] = self.input_devices[
-                            self.input_devices_indices.index(sd.default.device[0])
-                        ]
-                        data["sg_output_device"] = self.output_devices[
-                            self.output_devices_indices.index(sd.default.device[1])
-                        ]
-            except Exception:
-                with open("configs/inuse/config.json", "w") as j:
-                    data = {
-                        "pth_path": "",
-                        "index_path": "",
-                        "sg_hostapi": self.hostapis[0],
-                        "sg_wasapi_exclusive": False,
-                        "sg_input_device": self.input_devices[
-                            self.input_devices_indices.index(sd.default.device[0])
-                        ],
-                        "sg_output_device": self.output_devices[
-                            self.output_devices_indices.index(sd.default.device[1])
-                        ],
-                        "sr_type": "sr_model",
-                        "threhold": -60,
-                        "pitch": 0,
-                        "formant": 0.0,
-                        "index_rate": 0,
-                        "rms_mix_rate": 0,
-                        "block_time": 0.25,
-                        "crossfade_length": 0.05,
-                        "extra_time": 2.5,
-                        "n_cpu": 4,
-                        "f0method": "rmvpe",
-                        "use_jit": False,
-                        "use_pv": False,
-                    }
-                    data["sr_model"] = data["sr_type"] == "sr_model"
-                    data["sr_device"] = data["sr_type"] == "sr_device"
-                    data["pm"] = data["f0method"] == "pm"
-                    data["harvest"] = data["f0method"] == "harvest"
-                    data["crepe"] = data["f0method"] == "crepe"
-                    data["rmvpe"] = data["f0method"] == "rmvpe"
-                    data["fcpe"] = data["f0method"] == "fcpe"
+            data = self.rt_cfg.data
+            # gui 전용 키가 None(신규 설치)이면 현재 장치 기본값으로 초기화
+            if data.get("sg_hostapi") is None:
+                data["sg_hostapi"] = self.hostapis[0]
+            if data.get("sg_wasapi_exclusive") is None:
+                data["sg_wasapi_exclusive"] = False
+            if data.get("sr_type") is None:
+                data["sr_type"] = "sr_model"
+            # 저장된 hostapi가 유효하면 해당 장치 목록으로 갱신
+            if data["sg_hostapi"] in self.hostapis:
+                self.update_devices(hostapi_name=data["sg_hostapi"])
+                if (
+                    data["sg_input_device"] not in self.input_devices
+                    or data["sg_output_device"] not in self.output_devices
+                ):
+                    self.update_devices()
+                    data["sg_hostapi"] = self.hostapis[0]
+                    data["sg_input_device"] = self.input_devices[
+                        self.input_devices_indices.index(sd.default.device[0])
+                    ]
+                    data["sg_output_device"] = self.output_devices[
+                        self.output_devices_indices.index(sd.default.device[1])
+                    ]
+            else:
+                self.update_devices()
+                data["sg_hostapi"] = self.hostapis[0]
+                data["sg_input_device"] = self.input_devices[
+                    self.input_devices_indices.index(sd.default.device[0])
+                ]
+                data["sg_output_device"] = self.output_devices[
+                    self.output_devices_indices.index(sd.default.device[1])
+                ]
+            # f0method / sr_type을 UI용 boolean 파생 키로 변환
+            data["sr_model"] = data["sr_type"] == "sr_model"
+            data["sr_device"] = data["sr_type"] == "sr_device"
+            data["pm"] = data["f0method"] == "pm"
+            data["harvest"] = data["f0method"] == "harvest"
+            data["crepe"] = data["f0method"] == "crepe"
+            data["rmvpe"] = data["f0method"] == "rmvpe"
+            data["fcpe"] = data["f0method"] == "fcpe"
             return data
 
         def launcher(self):
@@ -599,8 +571,7 @@ if __name__ == "__main__":
                                 ].index(True)
                             ],
                         }
-                        with open("configs/inuse/config.json", "w") as j:
-                            json.dump(settings, j)
+                        self.rt_cfg.save(settings)
                         if self.stream is not None:
                             self.delay_time = (
                                 self.stream.latency[-1]
