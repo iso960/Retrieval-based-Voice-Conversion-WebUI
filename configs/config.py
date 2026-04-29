@@ -125,7 +125,9 @@ class TrainConfig:
         """예: get('v2', '40k') → json_config['v2/40k.json']"""
         key = f"{version}/{sr}.json"
         if key not in self.json_config:
-            raise KeyError(f"TrainConfig: '{key}' not found. Available: {list(self.json_config)}")
+            raise KeyError(
+                f"TrainConfig: '{key}' not found. Available: {list(self.json_config)}"
+            )
         return self.json_config[key]
 
     def set_fp32(self) -> None:
@@ -235,7 +237,9 @@ class RuntimeConfig:
                 logger.info("Found GPU %s", self.gpu_name)
             self.gpu_mem = int(
                 torch.cuda.get_device_properties(i_device).total_memory
-                / 1024 / 1024 / 1024
+                / 1024
+                / 1024
+                / 1024
                 + 0.4
             )
             if self.gpu_mem <= 4:
@@ -272,6 +276,7 @@ class RuntimeConfig:
                 except Exception:
                     pass
             import torch_directml
+
             self.device = torch_directml.device(torch_directml.default_device())
             self.is_half = False
         else:
@@ -295,9 +300,7 @@ class RuntimeConfig:
                 except Exception:
                     pass
 
-        logger.info(
-            "Half-precision: %s, device: %s", self.is_half, self.device
-        )
+        logger.info("Half-precision: %s, device: %s", self.is_half, self.device)
 
     def _pad_config(self) -> tuple[int, int, int, int]:
         if self.is_half:
