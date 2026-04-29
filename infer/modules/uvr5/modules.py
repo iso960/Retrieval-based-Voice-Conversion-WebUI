@@ -7,11 +7,11 @@ logger = logging.getLogger(__name__)
 import ffmpeg
 import torch
 
-from configs.config import Config
+from configs.config import RuntimeConfig
 from infer.modules.uvr5.mdxnet import MDXNetDereverb
 from infer.modules.uvr5.vr import AudioPre, AudioPreDeEcho
 
-config = Config()
+config = RuntimeConfig(argv=[])
 
 
 def uvr(model_name, inp_root, save_root_vocal, paths, save_root_ins, agg, format0):
