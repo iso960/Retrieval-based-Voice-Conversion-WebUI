@@ -1,6 +1,5 @@
 import math
 import random
-from typing import Optional, Tuple
 from fairseq.checkpoint_utils import load_model_ensemble_and_task
 import numpy as np
 import torch
@@ -93,8 +92,8 @@ def extract_features(
 
 
 def compute_mask_indices(
-    shape: Tuple[int, int],
-    padding_mask: Optional[torch.Tensor],
+    shape: tuple[int, int],
+    padding_mask: torch.Tensor | None,
     mask_prob: float,
     mask_length: int,
     mask_type: str = "static",
@@ -299,11 +298,11 @@ def get_hubert_model(
     def hubert_extract_features(
         self,
         source: torch.Tensor,
-        padding_mask: Optional[torch.Tensor] = None,
+        padding_mask: torch.Tensor | None = None,
         mask: bool = False,
         ret_conv: bool = False,
-        output_layer: Optional[int] = None,
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        output_layer: int | None = None,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         res = self._forward(
             source,
             padding_mask=padding_mask,
@@ -316,11 +315,11 @@ def get_hubert_model(
 
     def _hubert_extract_features(
         source: torch.Tensor,
-        padding_mask: Optional[torch.Tensor] = None,
+        padding_mask: torch.Tensor | None = None,
         mask: bool = False,
         ret_conv: bool = False,
-        output_layer: Optional[int] = None,
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        output_layer: int | None = None,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         return hubert_extract_features(
             hubert_model, source, padding_mask, mask, ret_conv, output_layer
         )

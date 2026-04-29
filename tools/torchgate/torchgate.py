@@ -1,7 +1,6 @@
 import torch
 from infer.lib.rmvpe import STFT
 from torch.nn.functional import conv1d, conv2d
-from typing import Union, Optional
 from .utils import linspace, temperature_sigmoid, amp_to_db
 
 
@@ -72,7 +71,7 @@ class TorchGate(torch.nn.Module):
         self.register_buffer("smoothing_filter", self._generate_mask_smoothing_filter())
 
     @torch.no_grad()
-    def _generate_mask_smoothing_filter(self) -> Union[torch.Tensor, None]:
+    def _generate_mask_smoothing_filter(self) -> torch.Tensor | None:
         """
         A PyTorch module that applies a spectral gate to an input signal using the STFT.
 
@@ -126,7 +125,7 @@ class TorchGate(torch.nn.Module):
 
     @torch.no_grad()
     def _stationary_mask(
-        self, X_db: torch.Tensor, xn: Optional[torch.Tensor] = None
+        self, X_db: torch.Tensor, xn: torch.Tensor | None = None
     ) -> torch.Tensor:
         """
         Computes a stationary binary mask to filter out noise in a log-magnitude spectrogram.
@@ -208,14 +207,14 @@ class TorchGate(torch.nn.Module):
         return sig_mask
 
     def forward(
-        self, x: torch.Tensor, xn: Optional[torch.Tensor] = None
+        self, x: torch.Tensor, xn: torch.Tensor | None = None
     ) -> torch.Tensor:
         """
         Apply the proposed algorithm to the input signal.
 
         Arguments:
             x (torch.Tensor): The input audio signal, with shape (batch_size, signal_length).
-            xn (Optional[torch.Tensor]): The noise signal used for stationary noise reduction. If `None`, the input
+            xn (torch.Tensor | None): The noise signal used for stationary noise reduction. If `None`, the input
                                          signal is used as the noise signal. Default: `None`.
 
         Returns:
