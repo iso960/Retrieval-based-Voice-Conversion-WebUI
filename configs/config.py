@@ -67,6 +67,7 @@ class RealtimeConfig:
             # DEFAULT 키 중 누락된 것은 기본값으로 보완
             return {**self.DEFAULT, **loaded}
         except Exception:
+            logger.warning("RealtimeConfig: failed to load %s, using defaults", self.path, exc_info=True)
             return dict(self.DEFAULT)
 
     def save(self, data: dict) -> None:
@@ -122,7 +123,7 @@ class TrainConfig:
         return d
 
     def get(self, version: str, sr: str) -> dict:
-        """예: get('v2', '40k') → json_config['v2/40k.json']"""
+        """예: get('v1', '40k') → json_config['v1/40k.json']"""
         key = f"{version}/{sr}.json"
         if key not in self.json_config:
             raise KeyError(f"TrainConfig: '{key}' not found. Available: {list(self.json_config)}")
@@ -134,9 +135,10 @@ class TrainConfig:
             self.json_config[rel_path]["train"]["fp16_run"] = False
             inuse = os.path.join(self.config_dir, "inuse", rel_path)
             with open(inuse, "r", encoding="utf-8") as f:
-                content = f.read().replace("true", "false")
+                data = json.load(f)
+            data["train"]["fp16_run"] = False
             with open(inuse, "w", encoding="utf-8") as f:
-                f.write(content)
+                json.dump(data, f, ensure_ascii=False, indent=2)
             logger.info("TrainConfig: overwrite fp16_run=false in %s", rel_path)
 
 
@@ -175,7 +177,7 @@ class RuntimeConfig:
         self.noautoopen: bool = False
         self.dml: bool = False
 
-        if argv is None or argv != []:
+        if argv != []:
             self._parse_args(argv)
         self._detect_device()
 
@@ -215,27 +217,29 @@ class RuntimeConfig:
             if self.has_xpu():
                 self.device = self.instead = "xpu:0"
                 self.is_half = True
-            i_device = int(self.device.split(":")[-1])
-            self.gpu_name = torch.cuda.get_device_name(i_device)
-            if (
-                ("16" in self.gpu_name and "V100" not in self.gpu_name.upper())
-                or "P40" in self.gpu_name.upper()
-                or "P10" in self.gpu_name.upper()
-                or "1060" in self.gpu_name
-                or "1070" in self.gpu_name
-                or "1080" in self.gpu_name
-            ):
-                logger.info("Found GPU %s, force to fp32", self.gpu_name)
-                self._force_fp32()
+                logger.info("Found XPU, use xpu:0")
             else:
-                logger.info("Found GPU %s", self.gpu_name)
-            self.gpu_mem = int(
-                torch.cuda.get_device_properties(i_device).total_memory
-                / 1024 / 1024 / 1024
-                + 0.4
-            )
-            if self.gpu_mem <= 4:
-                self.preprocess_per = 3.0
+                i_device = int(self.device.split(":")[-1])
+                self.gpu_name = torch.cuda.get_device_name(i_device)
+                if (
+                    ("16" in self.gpu_name and "V100" not in self.gpu_name.upper())
+                    or "P40" in self.gpu_name.upper()
+                    or "P10" in self.gpu_name.upper()
+                    or "1060" in self.gpu_name
+                    or "1070" in self.gpu_name
+                    or "1080" in self.gpu_name
+                ):
+                    logger.info("Found GPU %s, force to fp32", self.gpu_name)
+                    self._force_fp32()
+                else:
+                    logger.info("Found GPU %s", self.gpu_name)
+                self.gpu_mem = int(
+                    torch.cuda.get_device_properties(i_device).total_memory
+                    / 1024 / 1024 / 1024
+                    + 0.4
+                )
+                if self.gpu_mem <= 4:
+                    self.preprocess_per = 3.0
         elif self.has_mps():
             logger.info("No supported Nvidia GPU found")
             self.device = self.instead = "mps"

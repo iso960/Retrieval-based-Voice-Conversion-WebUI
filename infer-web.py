@@ -53,6 +53,8 @@ torch.manual_seed(114514)
 
 config = RuntimeConfig()
 train_config = TrainConfig()
+if not config.is_half:
+    train_config.set_fp32()
 vc = VC(config)
 
 
