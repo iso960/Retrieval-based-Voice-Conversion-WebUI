@@ -204,6 +204,18 @@ class VC:
             logger.warning(info)
             return info, (None, None)
 
+    def _save_audio(self, audio_opt, tgt_sr, opt_root, input_path, format1) -> str:
+        out = "%s/%s.%s" % (opt_root, os.path.basename(input_path), format1)
+        if format1 in ["wav", "flac"]:
+            sf.write(out, audio_opt, tgt_sr)
+        else:
+            with BytesIO() as wavf:
+                sf.write(wavf, audio_opt, tgt_sr, format="wav")
+                wavf.seek(0, 0)
+                with open(out, "wb") as outf:
+                    wav2(wavf, outf, format1)
+        return out
+
     def vc_multi(
         self,
         sid,
@@ -257,24 +269,7 @@ class VC:
                 if "Success" in info:
                     try:
                         tgt_sr, audio_opt = opt
-                        if format1 in ["wav", "flac"]:
-                            sf.write(
-                                "%s/%s.%s"
-                                % (opt_root, os.path.basename(input_path), format1),
-                                audio_opt,
-                                tgt_sr,
-                            )
-                        else:
-                            output_path = "%s/%s.%s" % (
-                                opt_root,
-                                os.path.basename(input_path),
-                                format1,
-                            )
-                            with BytesIO() as wavf:
-                                sf.write(wavf, audio_opt, tgt_sr, format="wav")
-                                wavf.seek(0, 0)
-                                with open(output_path, "wb") as outf:
-                                    wav2(wavf, outf, format1)
+                        self._save_audio(audio_opt, tgt_sr, opt_root, input_path, format1)
                     except Exception:
                         info += traceback.format_exc()
                 infos.append("%s->%s" % (os.path.basename(input_path), info))
