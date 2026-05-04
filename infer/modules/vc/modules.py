@@ -28,7 +28,6 @@ class VC:
         self.cpt = None
         self.version = None
         self.if_f0 = None
-        self.version = None
         self.hubert_model = None
 
         self.config = config
@@ -60,26 +59,7 @@ class VC:
                 self.hubert_model = self.net_g = self.n_spk = self.hubert_model = (
                     self.tgt_sr
                 ) = None
-                if torch.cuda.is_available():
-                    torch.cuda.empty_cache()
-                ###楼下不这么折腾清理不干净
-                self.if_f0 = self.cpt.get("f0", 1)
-                self.version = self.cpt.get("version", "v1")
-                if self.version == "v1":
-                    if self.if_f0 == 1:
-                        self.net_g = SynthesizerTrnMs256NSFsid(
-                            *self.cpt["config"], is_half=self.config.is_half
-                        )
-                    else:
-                        self.net_g = SynthesizerTrnMs256NSFsid_nono(*self.cpt["config"])
-                elif self.version == "v2":
-                    if self.if_f0 == 1:
-                        self.net_g = SynthesizerTrnMs768NSFsid(
-                            *self.cpt["config"], is_half=self.config.is_half
-                        )
-                    else:
-                        self.net_g = SynthesizerTrnMs768NSFsid_nono(*self.cpt["config"])
-                del self.net_g, self.cpt
+                self.cpt = None
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
             return (
@@ -258,10 +238,10 @@ class VC:
                 traceback.print_exc()
                 paths = [path.name for path in paths]
             infos = []
-            for path in paths:
+            for input_path in paths:
                 info, opt = self.vc_single(
                     sid,
-                    path,
+                    input_path,
                     f0_up_key,
                     None,
                     f0_method,
@@ -280,24 +260,24 @@ class VC:
                         if format1 in ["wav", "flac"]:
                             sf.write(
                                 "%s/%s.%s"
-                                % (opt_root, os.path.basename(path), format1),
+                                % (opt_root, os.path.basename(input_path), format1),
                                 audio_opt,
                                 tgt_sr,
                             )
                         else:
-                            path = "%s/%s.%s" % (
+                            output_path = "%s/%s.%s" % (
                                 opt_root,
-                                os.path.basename(path),
+                                os.path.basename(input_path),
                                 format1,
                             )
                             with BytesIO() as wavf:
                                 sf.write(wavf, audio_opt, tgt_sr, format="wav")
                                 wavf.seek(0, 0)
-                                with open(path, "wb") as outf:
+                                with open(output_path, "wb") as outf:
                                     wav2(wavf, outf, format1)
                     except Exception:
                         info += traceback.format_exc()
-                infos.append("%s->%s" % (os.path.basename(path), info))
+                infos.append("%s->%s" % (os.path.basename(input_path), info))
                 yield "\n".join(infos)
             yield "\n".join(infos)
         except Exception:
