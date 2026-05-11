@@ -17,7 +17,7 @@ import torch.nn.functional as F
 import torchcrepe
 from torchaudio.transforms import Resample
 
-from infer.lib.f0_utils import mel_quantize
+from infer.lib.f0_utils import mel_quantize, extract_f0_crepe
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
@@ -286,22 +286,12 @@ class RVC:
             self.device
         ):  ###不支持dml，cpu又太慢用不成，拿fcpe顶替
             return self.get_f0(x, f0_up_key, 1, "fcpe")
-        # printt("using crepe,device:%s"%self.device)
-        f0, pd = torchcrepe.predict(
+        f0 = extract_f0_crepe(
             x.unsqueeze(0).float(),
-            16000,
-            160,
-            self.f0_min,
-            self.f0_max,
-            "full",
-            batch_size=512,
-            # device=self.device if self.device.type!="privateuseone" else "cpu",###crepe不用半精度全部是全精度所以不愁###cpu延迟高到没法用
             device=self.device,
-            return_periodicity=True,
+            f0_min=self.f0_min,
+            f0_max=self.f0_max,
         )
-        pd = torchcrepe.filter.median(pd, 3)
-        f0 = torchcrepe.filter.mean(f0, 3)
-        f0[pd < 0.1] = 0
         f0 *= pow(2, f0_up_key / 12)
         return self.get_f0_post(f0)
 

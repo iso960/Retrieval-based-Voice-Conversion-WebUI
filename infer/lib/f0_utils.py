@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import torch
+import torchcrepe
 
 
 def mel_quantize(
@@ -72,4 +73,40 @@ def extract_f0_rmvpe(
         del model.model
         del model
 
+    return f0
+
+
+def extract_f0_crepe(
+    audio: torch.Tensor,
+    device,
+    f0_min: float = 50,
+    f0_max: float = 1100,
+) -> torch.Tensor:
+    """crepe로 F0를 추출한다.
+
+    DML 폴백, 피치시프트, 양자화는 호출부 책임.
+
+    Args:
+        audio:  (1, N) float tensor
+        device: torch device
+        f0_min: 최저 피치 (Hz)
+        f0_max: 최고 피치 (Hz)
+
+    Returns:
+        f0: raw pitch tensor (피치시프트/양자화 전)
+    """
+    f0, pd = torchcrepe.predict(
+        audio,
+        16000,
+        160,
+        f0_min,
+        f0_max,
+        "full",
+        batch_size=512,
+        device=device,
+        return_periodicity=True,
+    )
+    pd = torchcrepe.filter.median(pd, 3)
+    f0 = torchcrepe.filter.mean(f0, 3)
+    f0[pd < 0.1] = 0
     return f0

@@ -18,7 +18,7 @@ import torch.nn.functional as F
 import torchcrepe
 from scipy import signal
 
-from infer.lib.f0_utils import mel_quantize, extract_f0_rmvpe
+from infer.lib.f0_utils import mel_quantize, extract_f0_crepe, extract_f0_rmvpe
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
@@ -121,25 +121,8 @@ class Pipeline(object):
             if filter_radius > 2:
                 f0 = signal.medfilt(f0, 3)
         elif f0_method == "crepe":
-            model = "full"
-            # Pick a batch size that doesn't cause memory errors on your gpu
-            batch_size = 512
-            # Compute pitch using first gpu
             audio = torch.tensor(np.copy(x))[None].float()
-            f0, pd = torchcrepe.predict(
-                audio,
-                self.sr,
-                self.window,
-                f0_min,
-                f0_max,
-                model,
-                batch_size=batch_size,
-                device=self.device,
-                return_periodicity=True,
-            )
-            pd = torchcrepe.filter.median(pd, 3)
-            f0 = torchcrepe.filter.mean(f0, 3)
-            f0[pd < 0.1] = 0
+            f0 = extract_f0_crepe(audio, device=self.device, f0_min=f0_min, f0_max=f0_max)
             f0 = f0[0].cpu().numpy()
         elif f0_method == "rmvpe":
             f0 = extract_f0_rmvpe(
