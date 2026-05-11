@@ -17,6 +17,8 @@ import torch.nn.functional as F
 import torchcrepe
 from torchaudio.transforms import Resample
 
+from infer.lib.f0_utils import mel_quantize
+
 now_dir = os.getcwd()
 sys.path.append(now_dir)
 from multiprocessing import Manager as M
@@ -206,14 +208,7 @@ class RVC:
         if not torch.is_tensor(f0):
             f0 = torch.from_numpy(f0)
         f0 = f0.float().to(self.device).squeeze()
-        f0_mel = 1127 * torch.log(1 + f0 / 700)
-        f0_mel[f0_mel > 0] = (f0_mel[f0_mel > 0] - self.f0_mel_min) * 254 / (
-            self.f0_mel_max - self.f0_mel_min
-        ) + 1
-        f0_mel[f0_mel <= 1] = 1
-        f0_mel[f0_mel > 255] = 255
-        f0_coarse = torch.round(f0_mel).long()
-        return f0_coarse, f0
+        return mel_quantize(f0, self.f0_mel_min, self.f0_mel_max)
 
     def get_f0(self, x, f0_up_key, n_cpu, method="harvest"):
         n_cpu = int(n_cpu)

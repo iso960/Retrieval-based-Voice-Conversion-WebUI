@@ -18,6 +18,8 @@ import torch.nn.functional as F
 import torchcrepe
 from scipy import signal
 
+from infer.lib.f0_utils import mel_quantize, extract_f0_rmvpe
+
 now_dir = os.getcwd()
 sys.path.append(now_dir)
 
@@ -140,23 +142,13 @@ class Pipeline(object):
             f0[pd < 0.1] = 0
             f0 = f0[0].cpu().numpy()
         elif f0_method == "rmvpe":
-            if not hasattr(self, "model_rmvpe"):
-                from infer.lib.rmvpe import RMVPE
-
-                logger.info(
-                    "Loading rmvpe model,%s" % "%s/rmvpe.pt" % os.environ["rmvpe_root"]
-                )
-                self.model_rmvpe = RMVPE(
-                    "%s/rmvpe.pt" % os.environ["rmvpe_root"],
-                    is_half=self.is_half,
-                    device=self.device,
-                )
-            f0 = self.model_rmvpe.infer_from_audio(x, thred=0.03)
-
-            if "privateuseone" in str(self.device):  # clean ortruntime memory
-                del self.model_rmvpe.model
-                del self.model_rmvpe
-                logger.info("Cleaning ortruntime memory")
+            f0 = extract_f0_rmvpe(
+                x,
+                model_path="%s/rmvpe.pt" % os.environ["rmvpe_root"],
+                use_jit=False,
+                is_half=self.is_half,
+                device=self.device,
+            )
 
         f0 *= pow(2, f0_up_key / 12)
         # with open("test.txt","w")as f:f.write("\n".join([str(i)for i in f0.tolist()]))
@@ -173,15 +165,8 @@ class Pipeline(object):
                 :shape
             ]
         # with open("test_opt.txt","w")as f:f.write("\n".join([str(i)for i in f0.tolist()]))
-        f0bak = f0.copy()
-        f0_mel = 1127 * np.log(1 + f0 / 700)
-        f0_mel[f0_mel > 0] = (f0_mel[f0_mel > 0] - f0_mel_min) * 254 / (
-            f0_mel_max - f0_mel_min
-        ) + 1
-        f0_mel[f0_mel <= 1] = 1
-        f0_mel[f0_mel > 255] = 255
-        f0_coarse = np.rint(f0_mel).astype(np.int32)
-        return f0_coarse, f0bak  # 1-0
+        f0_coarse, f0_mel = mel_quantize(f0, f0_mel_min, f0_mel_max)
+        return f0_coarse, f0_mel
 
     def vc(
         self,
