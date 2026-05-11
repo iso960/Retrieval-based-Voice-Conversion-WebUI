@@ -1102,8 +1102,27 @@ with gr.Blocks(title="RVC WebUI") as app:
                         [vc_output3],
                         api_name="infer_convert_batch",
                     )
+                def _change_voice(sid, protect0_val, protect1_val):
+                    result = vc.get_vc(sid)
+                    if result is None:
+                        return (
+                            gr.update(visible=False),
+                            gr.update(visible=True, value=protect0_val),
+                            gr.update(visible=True, value=protect1_val),
+                            "",
+                            "",
+                        )
+                    n_spk, tgt_sr, if_f0, version, index_path = result
+                    return (
+                        gr.update(visible=True, maximum=n_spk),
+                        gr.update(visible=if_f0 != 0, value=protect0_val if if_f0 != 0 else 0.5),
+                        gr.update(visible=if_f0 != 0, value=protect1_val if if_f0 != 0 else 0.33),
+                        gr.update(value=index_path),
+                        gr.update(value=index_path),
+                    )
+
                 sid0.change(
-                    fn=vc.get_vc,
+                    fn=_change_voice,
                     inputs=[sid0, protect0, protect1],
                     outputs=[spk_item, protect0, protect1, file_index2, file_index4],
                     api_name="infer_change_voice",

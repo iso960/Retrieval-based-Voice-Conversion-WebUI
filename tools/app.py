@@ -57,7 +57,14 @@ with app:
                     visible=False,
                     interactive=True,
                 )
-            sid.change(fn=vc.get_vc, inputs=[sid], outputs=[spk_item])
+            def _change_voice(sid):
+                result = vc.get_vc(sid)
+                if result is None:
+                    return gr.update(visible=False)
+                n_spk, tgt_sr, if_f0, version, index_path = result
+                return gr.update(visible=True, maximum=n_spk)
+
+            sid.change(fn=_change_voice, inputs=[sid], outputs=[spk_item])
             gr.Markdown(
                 value=i18n(
                     "男转女推荐+12key, 女转男推荐-12key, 如果音域爆炸导致音色失真也可以自己调整到合适音域. "
