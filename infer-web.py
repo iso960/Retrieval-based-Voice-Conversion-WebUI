@@ -775,20 +775,20 @@ def change_f0_method(f0method8):
 
 with gr.Blocks(title="RVC WebUI") as app:
     gr.Markdown("## RVC WebUI")
-    gr.Markdown(
-        value=i18n(
-            "本软件以MIT协议开源, 作者不对软件具备任何控制力, 使用软件者、传播软件导出的声音者自负全责. <br>如不认可该条款, 则不能使用或引用软件包内任何代码和文件. 详见根目录<b>LICENSE</b>."
+    with gr.Accordion("License (MIT)", open=False):
+        gr.Markdown(
+            value=i18n(
+                "本软件以MIT协议开源, 作者不对软件具备任何控制力, 使用软件者、传播软件导出的声音者自负全责. <br>如不认可该条款, 则不能使用或引用软件包内任何代码和文件. 详见根目录<b>LICENSE</b>."
+            )
         )
-    )
     with gr.Tabs():
         with gr.TabItem(i18n("模型推理")):
             with gr.Row():
-                sid0 = gr.Dropdown(label=i18n("推理音色"), choices=sorted(names))
-                with gr.Column():
-                    refresh_button = gr.Button(
-                        i18n("刷新音色列表和索引路径"), variant="primary"
-                    )
-                    clean_button = gr.Button(i18n("卸载音色省显存"), variant="primary")
+                sid0 = gr.Dropdown(label=i18n("推理音色"), choices=sorted(names), scale=6)
+                refresh_button = gr.Button(
+                    i18n("刷新音色列表和索引路径"), variant="primary", scale=2
+                )
+                clean_button = gr.Button(i18n("卸载音色省显存"), variant="primary", scale=2)
                 spk_item = gr.Slider(
                     minimum=0,
                     maximum=2333,
@@ -844,7 +844,7 @@ with gr.Blocks(title="RVC WebUI") as app:
                             resample_sr0 = gr.Slider(
                                 minimum=0,
                                 maximum=48000,
-                                label=i18n("后处理重采样至最终采样率，0为不进行重采样"),
+                                label=i18n("출력 음질 리샘플링 — 0으로 설정하면 원본 유지"),
                                 value=0,
                                 step=1,
                                 interactive=True,
@@ -853,7 +853,7 @@ with gr.Blocks(title="RVC WebUI") as app:
                                 minimum=0,
                                 maximum=1,
                                 label=i18n(
-                                    "输入源音量包络替换输出音量包络融合比例，越靠近1越使用输出包络"
+                                    "원본/변환 볼륨 혼합 — 높을수록 변환된 목소리 볼륨 기준으로 출력"
                                 ),
                                 value=0.25,
                                 interactive=True,
@@ -862,7 +862,7 @@ with gr.Blocks(title="RVC WebUI") as app:
                                 minimum=0,
                                 maximum=0.5,
                                 label=i18n(
-                                    "保护清辅音和呼吸声，防止电音撕裂等artifact，拉满0.5不开启，调低加大保护力度但可能降低索引效果"
+                                    "배경음 보호 강도 — 낮추면 인덱스 효과 강해지지만 잡음 증가 가능"
                                 ),
                                 value=0.33,
                                 step=0.01,
@@ -872,7 +872,7 @@ with gr.Blocks(title="RVC WebUI") as app:
                                 minimum=0,
                                 maximum=7,
                                 label=i18n(
-                                    ">=3则使用对harvest音高识别的结果使用中值滤波，数值为滤波半径，使用可以削弱哑音"
+                                    "피치 스무딩 (harvest 전용) — 3 이상이면 끊기는 음정 부드럽게 보정"
                                 ),
                                 value=3,
                                 step=1,
@@ -881,7 +881,7 @@ with gr.Blocks(title="RVC WebUI") as app:
                             index_rate1 = gr.Slider(
                                 minimum=0,
                                 maximum=1,
-                                label=i18n("检索特征占比"),
+                                label=i18n("인덱스 반영 비율 — 높을수록 학습된 음색 특징을 더 강하게 반영"),
                                 value=0.75,
                                 interactive=True,
                             )
@@ -989,7 +989,7 @@ with gr.Blocks(title="RVC WebUI") as app:
                         resample_sr1 = gr.Slider(
                             minimum=0,
                             maximum=48000,
-                            label=i18n("后处理重采样至最终采样率，0为不进行重采样"),
+                            label=i18n("출력 음질 리샘플링 — 0으로 설정하면 원본 유지"),
                             value=0,
                             step=1,
                             interactive=True,
@@ -998,7 +998,7 @@ with gr.Blocks(title="RVC WebUI") as app:
                             minimum=0,
                             maximum=1,
                             label=i18n(
-                                "输入源音量包络替换输出音量包络融合比例，越靠近1越使用输出包络"
+                                "원본/변환 볼륨 혼합 — 높을수록 변환된 목소리 볼륨 기준으로 출력"
                             ),
                             value=1,
                             interactive=True,
@@ -1007,7 +1007,7 @@ with gr.Blocks(title="RVC WebUI") as app:
                             minimum=0,
                             maximum=0.5,
                             label=i18n(
-                                "保护清辅音和呼吸声，防止电音撕裂等artifact，拉满0.5不开启，调低加大保护力度但可能降低索引效果"
+                                "배경음 보호 강도 — 낮추면 인덱스 효과 강해지지만 잡음 증가 가능"
                             ),
                             value=0.33,
                             step=0.01,
@@ -1017,7 +1017,7 @@ with gr.Blocks(title="RVC WebUI") as app:
                             minimum=0,
                             maximum=7,
                             label=i18n(
-                                ">=3则使用对harvest音高识别的结果使用中值滤波，数值为滤波半径，使用可以削弱哑音"
+                                "피치 스무딩 (harvest 전용) — 3 이상이면 끊기는 음정 부드럽게 보정"
                             ),
                             value=3,
                             step=1,
@@ -1026,7 +1026,7 @@ with gr.Blocks(title="RVC WebUI") as app:
                         index_rate2 = gr.Slider(
                             minimum=0,
                             maximum=1,
-                            label=i18n("检索特征占比"),
+                            label=i18n("인덱스 반영 비율 — 높을수록 학습된 음색 특징을 더 강하게 반영"),
                             value=1,
                             interactive=True,
                         )
