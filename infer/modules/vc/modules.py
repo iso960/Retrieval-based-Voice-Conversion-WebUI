@@ -207,7 +207,7 @@ class VC:
                         os.path.join(dir_path, name) for name in os.listdir(dir_path)
                     ]
                 else:
-                    paths = [path.name for path in paths]
+                    paths = list(paths)
             except Exception:
                 traceback.print_exc()
                 paths = [path.name for path in paths]
