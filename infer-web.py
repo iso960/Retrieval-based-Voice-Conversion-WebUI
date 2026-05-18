@@ -20,6 +20,26 @@ from sklearn.cluster import MiniBatchKMeans
 import torch, platform
 import numpy as np
 import gradio as gr
+import gradio_client.utils as _gc_utils
+
+_orig_get_type = _gc_utils.get_type
+
+def _patched_get_type(schema):
+    if isinstance(schema, bool):
+        return "Any"
+    return _orig_get_type(schema)
+
+_gc_utils.get_type = _patched_get_type
+
+_orig_j2p = _gc_utils._json_schema_to_python_type
+
+def _patched_j2p(schema, defs):
+    if isinstance(schema, bool):
+        return "Any"
+    return _orig_j2p(schema, defs)
+
+_gc_utils._json_schema_to_python_type = _patched_j2p
+
 import faiss
 import fairseq
 import pathlib
@@ -787,7 +807,7 @@ with gr.Blocks(title="RVC WebUI") as app:
                     interactive=True,
                 )
                 clean_button.click(
-                    fn=clean, inputs=[], outputs=[sid0], api_name="infer_clean"
+                    fn=clean, inputs=[], outputs=[sid0]
                 )
             with gr.TabItem(i18n("单次推理")):
                 with gr.Group():
@@ -884,7 +904,6 @@ with gr.Blocks(title="RVC WebUI") as app:
                                 fn=change_choices,
                                 inputs=[],
                                 outputs=[sid0, file_index2],
-                                api_name="infer_refresh",
                             )
                             # file_big_npy1 = gr.Textbox(
                             #     label=i18n("特征文件路径"),
@@ -918,7 +937,6 @@ with gr.Blocks(title="RVC WebUI") as app:
                                 protect0,
                             ],
                             [vc_output1, vc_output2],
-                            api_name="infer_convert",
                         )
             with gr.TabItem(i18n("批量推理")):
                 gr.Markdown(
@@ -968,7 +986,6 @@ with gr.Blocks(title="RVC WebUI") as app:
                             fn=lambda: change_choices()[1],
                             inputs=[],
                             outputs=file_index4,
-                            api_name="infer_refresh_batch",
                         )
                         # file_big_npy2 = gr.Textbox(
                         #     label=i18n("特征文件路径"),
@@ -1057,7 +1074,6 @@ with gr.Blocks(title="RVC WebUI") as app:
                             format1,
                         ],
                         [vc_output3],
-                        api_name="infer_convert_batch",
                     )
                 def _change_voice(sid, protect0_val, protect1_val):
                     result = vc.get_vc(sid)
@@ -1082,7 +1098,6 @@ with gr.Blocks(title="RVC WebUI") as app:
                     fn=_change_voice,
                     inputs=[sid0, protect0, protect1],
                     outputs=[spk_item, protect0, protect1, file_index2, file_index4],
-                    api_name="infer_change_voice",
                 )
         with gr.TabItem(i18n("伴奏人声分离&去混响&去回声")):
             with gr.Group():
@@ -1140,7 +1155,6 @@ with gr.Blocks(title="RVC WebUI") as app:
                             format0,
                         ],
                         [vc_output4],
-                        api_name="uvr_convert",
                     )
         with gr.TabItem(i18n("训练")):
             gr.Markdown(
@@ -1158,8 +1172,8 @@ with gr.Blocks(title="RVC WebUI") as app:
                 )
                 if_f0_3 = gr.Radio(
                     label=i18n("模型是否带音高指导(唱歌一定要, 语音可以不要)"),
-                    choices=[True, False],
-                    value=True,
+                    choices=[1, 0],
+                    value=1,
                     interactive=True,
                 )
                 version19 = gr.Radio(
@@ -1202,7 +1216,6 @@ with gr.Blocks(title="RVC WebUI") as app:
                         preprocess_dataset,
                         [trainset_dir4, exp_dir1, sr2, np7],
                         [info1],
-                        api_name="train_preprocess",
                     )
             with gr.Group():
                 gr.Markdown(
@@ -1259,7 +1272,6 @@ with gr.Blocks(title="RVC WebUI") as app:
                             gpus_rmvpe,
                         ],
                         [info2],
-                        api_name="train_extract_f0_feature",
                     )
             with gr.Group():
                 gr.Markdown(value=i18n("step3: 填写训练设置, 开始训练模型和索引"))
@@ -1366,7 +1378,6 @@ with gr.Blocks(title="RVC WebUI") as app:
                             version19,
                         ],
                         info3,
-                        api_name="train_start",
                     )
                     but4.click(train_index, [exp_dir1, version19], info3)
                     but5.click(
@@ -1392,7 +1403,6 @@ with gr.Blocks(title="RVC WebUI") as app:
                             gpus_rmvpe,
                         ],
                         info3,
-                        api_name="train_start_all",
                     )
 
         with gr.TabItem(i18n("ckpt处理")):
@@ -1459,7 +1469,6 @@ with gr.Blocks(title="RVC WebUI") as app:
                         version_2,
                     ],
                     info4,
-                    api_name="ckpt_merge",
                 )  # def merge(path1,path2,alpha1,sr,f0,info):
             with gr.Group():
                 gr.Markdown(
@@ -1488,7 +1497,6 @@ with gr.Blocks(title="RVC WebUI") as app:
                     change_info,
                     [ckpt_path0, info_, name_to_save1],
                     info5,
-                    api_name="ckpt_modify",
                 )
             with gr.Group():
                 gr.Markdown(
@@ -1500,7 +1508,7 @@ with gr.Blocks(title="RVC WebUI") as app:
                     )
                     but8 = gr.Button(i18n("查看"), variant="primary")
                     info6 = gr.Textbox(label=i18n("输出信息"), value="", max_lines=8)
-                but8.click(show_info, [ckpt_path1], info6, api_name="ckpt_show")
+                but8.click(show_info, [ckpt_path1], info6)
             with gr.Group():
                 gr.Markdown(
                     value=i18n(
@@ -1549,7 +1557,6 @@ with gr.Blocks(title="RVC WebUI") as app:
                     extract_small_model,
                     [ckpt_path2, save_name, sr__, if_f0__, info___, version_1],
                     info7,
-                    api_name="ckpt_extract",
                 )
 
         with gr.TabItem(i18n("Onnx导出")):
@@ -1566,7 +1573,7 @@ with gr.Blocks(title="RVC WebUI") as app:
             with gr.Row():
                 butOnnx = gr.Button(i18n("导出Onnx模型"), variant="primary")
             butOnnx.click(
-                export_onnx, [ckpt_dir, onnx_dir], infoOnnx, api_name="export_onnx"
+                export_onnx, [ckpt_dir, onnx_dir], infoOnnx
             )
 
         tab_faq = i18n("常见问题解答")
