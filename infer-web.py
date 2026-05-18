@@ -773,7 +773,13 @@ def change_f0_method(f0method8):
     return gr.update(visible=visible)
 
 
-with gr.Blocks(title="RVC WebUI") as app:
+with gr.Blocks(
+    title="RVC WebUI",
+    css="""
+    button.primary { background: #46B03E !important; color: white !important; border: none !important; }
+    button.primary:hover { background: #389030 !important; }
+    """,
+) as app:
     gr.Markdown("## RVC WebUI")
     with gr.Accordion("License (MIT)", open=False):
         gr.Markdown(
@@ -904,9 +910,9 @@ with gr.Blocks(title="RVC WebUI") as app:
                             # )
                 with gr.Group():
                     with gr.Column():
-                        but0 = gr.Button(i18n("转换"), variant="primary")
+                        but0 = gr.Button(i18n("转换"), variant="primary", scale=1, min_width=120)
                         with gr.Row():
-                            vc_output1 = gr.Textbox(label=i18n("输出信息"))
+                            vc_output1 = gr.Textbox(label=i18n("输出信息"), lines=5)
                             vc_output2 = gr.Audio(
                                 label=i18n("输出音频(右下角三个点,点了可以下载)")
                             )
@@ -1043,7 +1049,7 @@ with gr.Blocks(title="RVC WebUI") as app:
                     )
 
                 with gr.Row():
-                    but1 = gr.Button(i18n("转换"), variant="primary")
+                    but1 = gr.Button(i18n("转换"), variant="primary", scale=1, min_width=120)
                     vc_output3 = gr.Textbox(label=i18n("输出信息"))
 
                     but1.click(
