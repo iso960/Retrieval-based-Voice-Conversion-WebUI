@@ -143,14 +143,6 @@ else:
     default_batch_size = 1
 gpus = "-".join([i[0] for i in gpu_infos])
 
-
-class ToolButton(gr.Button):
-    """Small button with single emoji as text, fits inside gradio forms"""
-
-    def __init__(self, **kwargs):
-        super().__init__(variant="tool", **kwargs)
-
-
 weight_root = os.getenv("weight_root")
 weight_uvr5_root = os.getenv("weight_uvr5_root")
 index_root = os.getenv("index_root")
@@ -199,7 +191,7 @@ def clean():
 def export_onnx(ModelPath, ExportedPath):
     from infer.modules.onnx.export import export_onnx as eo
 
-    eo(ModelPath, ExportedPath)
+    return eo(ModelPath, ExportedPath)
 
 
 sr_dict = {
@@ -1569,7 +1561,7 @@ with gr.Blocks(title="RVC WebUI") as app:
                     label=i18n("Onnx输出路径"), value="", interactive=True
                 )
             with gr.Row():
-                infoOnnx = gr.Label(label="info")
+                infoOnnx = gr.Textbox(label="info", interactive=False)
             with gr.Row():
                 butOnnx = gr.Button(i18n("导出Onnx模型"), variant="primary")
             butOnnx.click(
