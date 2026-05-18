@@ -11,7 +11,7 @@ librosa>=0.10.0
 llvmlite>=0.40.0
 fairseq @ git+https://github.com/One-sixth/fairseq.git
 faiss-cpu>=1.7.4
-gradio>=3.34.0,<4.0.0
+gradio>=4.0.0,<5.0.0
 Cython
 pydub>=0.25.1
 soundfile>=0.12.1

@@ -169,14 +169,11 @@ def change_choices():
         for name in files:
             if name.endswith(".index") and "trained" not in name:
                 index_paths.append("%s/%s" % (root, name))
-    return {"choices": sorted(names), "__type__": "update"}, {
-        "choices": sorted(index_paths),
-        "__type__": "update",
-    }
+    return gr.update(choices=sorted(names)), gr.update(choices=sorted(index_paths))
 
 
 def clean():
-    return {"value": "", "__type__": "update"}
+    return gr.update(value="")
 
 
 def export_onnx(ModelPath, ExportedPath):
@@ -421,9 +418,9 @@ def change_version19(sr2, if_f0_3, version19):
     if sr2 == "32k" and version19 == "v1":
         sr2 = "40k"
     to_return_sr2 = (
-        {"choices": ["40k", "48k"], "__type__": "update", "value": sr2}
+        gr.update(choices=["40k", "48k"], value=sr2)
         if version19 == "v1"
-        else {"choices": ["40k", "48k", "32k"], "__type__": "update", "value": sr2}
+        else gr.update(choices=["40k", "48k", "32k"], value=sr2)
     )
     f0_str = "f0" if if_f0_3 else ""
     return (
@@ -435,8 +432,8 @@ def change_version19(sr2, if_f0_3, version19):
 def change_f0(if_f0_3, sr2, version19):  # f0method8,pretrained_G14,pretrained_D15
     path_str = "" if version19 == "v1" else "_v2"
     return (
-        {"visible": if_f0_3, "__type__": "update"},
-        {"visible": if_f0_3, "__type__": "update"},
+        gr.update(visible=if_f0_3),
+        gr.update(visible=if_f0_3),
         *get_pretrained_models(path_str, "f0" if if_f0_3 == True else "", sr2),
     )
 
@@ -739,7 +736,7 @@ def train1key(
 #                    ckpt_path2.change(change_info_,[ckpt_path2],[sr__,if_f0__])
 def change_info_(ckpt_path):
     if not os.path.exists(ckpt_path.replace(os.path.basename(ckpt_path), "train.log")):
-        return {"__type__": "update"}, {"__type__": "update"}, {"__type__": "update"}
+        return gr.update(), gr.update(), gr.update()
     try:
         with open(
             ckpt_path.replace(os.path.basename(ckpt_path), "train.log"), "r"
@@ -750,7 +747,7 @@ def change_info_(ckpt_path):
             return sr, str(f0), version
     except Exception:
         traceback.print_exc()
-        return {"__type__": "update"}, {"__type__": "update"}, {"__type__": "update"}
+        return gr.update(), gr.update(), gr.update()
 
 
 F0GPUVisible = config.dml == False
@@ -761,7 +758,7 @@ def change_f0_method(f0method8):
         visible = F0GPUVisible
     else:
         visible = False
-    return {"visible": visible, "__type__": "update"}
+    return gr.update(visible=visible)
 
 
 with gr.Blocks(title="RVC WebUI") as app:
@@ -1592,5 +1589,4 @@ with gr.Blocks(title="RVC WebUI") as app:
             server_name="0.0.0.0",
             inbrowser=not config.noautoopen,
             server_port=config.listen_port,
-            quiet=True,
         )
