@@ -138,6 +138,13 @@ pip install FreeSimpleGUI "sounddevice<0.5.0"
 go-realtime-gui.bat
 ```
 
+## 훈련 파라미터 템플릿
+
+- `assets/templates/rvc_train_params.xlsx` 템플릿 파일 제공
+- 훈련 탭 최상단에서 엑셀 파일 업로드 시 파라미터 자동 적용
+- 노란색 [입력값] 열에만 값을 입력, 비워두면 기본값 적용
+- 템플릿 적용 파라미터: epoch 수, 배치 크기, 샘플링률, 음높이 지도, 알고리즘, 인덱스 비율, 보호 강도, pretrained 모델 경로
+
 ## 참조 프로젝트
 
 - [ContentVec](https://github.com/auspicious3000/contentvec/)
