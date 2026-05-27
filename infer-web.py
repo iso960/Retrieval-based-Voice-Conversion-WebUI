@@ -1170,7 +1170,7 @@ with gr.Blocks(
                     interactive=True,
                 )
                 if_f0_3 = gr.Radio(
-                    label=i18n("模型是否带音高指导(唱歌一定要, 语音可以不要)"),
+                    label=i18n("음높이 지도 사용 (노래=필수, 음성=불필요)"),
                     choices=[1, 0],
                     value=1,
                     interactive=True,
@@ -1186,7 +1186,7 @@ with gr.Blocks(
                     minimum=0,
                     maximum=config.n_cpu,
                     step=1,
-                    label=i18n("提取音高和处理数据使用的CPU进程数"),
+                    label=i18n("데이터 처리 CPU 프로세스 수"),
                     value=int(np.ceil(config.n_cpu / 1.5)),
                     interactive=True,
                 )
@@ -1279,7 +1279,7 @@ with gr.Blocks(
                         minimum=1,
                         maximum=50,
                         step=1,
-                        label=i18n("保存频率save_every_epoch"),
+                        label=i18n("체크포인트 저장 주기 (epoch)"),
                         value=5,
                         interactive=True,
                     )
@@ -1287,7 +1287,7 @@ with gr.Blocks(
                         minimum=2,
                         maximum=1000,
                         step=1,
-                        label=i18n("总训练轮数total_epoch"),
+                        label=i18n("총 훈련 epoch 수"),
                         value=20,
                         interactive=True,
                     )
@@ -1295,7 +1295,7 @@ with gr.Blocks(
                         minimum=1,
                         maximum=40,
                         step=1,
-                        label=i18n("每张显卡的batch_size"),
+                        label=i18n("배치 크기 (GPU당)"),
                         value=default_batch_size,
                         interactive=True,
                     )
