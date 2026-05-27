@@ -1568,9 +1568,9 @@ with gr.Blocks(
                     label=i18n("Onnx输出路径"), value="", interactive=True
                 )
             with gr.Row():
-                infoOnnx = gr.Textbox(label="info", interactive=False)
-            with gr.Row():
                 butOnnx = gr.Button(i18n("导出Onnx模型"), variant="primary")
+            with gr.Row():
+                infoOnnx = gr.Textbox(label=i18n("출력 정보"), interactive=False)
             butOnnx.click(
                 export_onnx, [ckpt_dir, onnx_dir], infoOnnx
             )
