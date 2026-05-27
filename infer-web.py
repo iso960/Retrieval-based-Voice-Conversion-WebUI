@@ -1441,7 +1441,7 @@ with gr.Blocks(
                         interactive=True,
                     )
                     name_to_save0 = gr.Textbox(
-                        label=i18n("保存的模型名不带后缀"),
+                        label=i18n("저장할 모델명 (확장자 제외)"),
                         value="",
                         max_lines=1,
                         interactive=True,
@@ -1475,7 +1475,7 @@ with gr.Blocks(
                 )
                 with gr.Row():
                     ckpt_path0 = gr.Textbox(
-                        label=i18n("模型路径"), value="", interactive=True
+                        label=i18n("수정할 모델 경로"), value="", interactive=True
                     )
                     info_ = gr.Textbox(
                         label=i18n("要改的模型信息"),
@@ -1484,7 +1484,7 @@ with gr.Blocks(
                         interactive=True,
                     )
                     name_to_save1 = gr.Textbox(
-                        label=i18n("保存的文件名, 默认空为和源文件同名"),
+                        label=i18n("저장할 파일명 (비우면 원본과 동일)"),
                         value="",
                         max_lines=8,
                         interactive=True,
@@ -1503,7 +1503,7 @@ with gr.Blocks(
                 )
                 with gr.Row():
                     ckpt_path1 = gr.Textbox(
-                        label=i18n("模型路径"), value="", interactive=True
+                        label=i18n("확인할 모델 경로"), value="", interactive=True
                     )
                     but8 = gr.Button(i18n("查看"), variant="primary")
                     info6 = gr.Textbox(label=i18n("输出信息"), value="", max_lines=8)
@@ -1516,7 +1516,7 @@ with gr.Blocks(
                 )
                 with gr.Row():
                     ckpt_path2 = gr.Textbox(
-                        label=i18n("模型路径"),
+                        label=i18n("추출할 모델 경로"),
                         value="E:\\codes\\py39\\logs\\mi-test_f0_48k\\G_23333.pth",
                         interactive=True,
                     )
