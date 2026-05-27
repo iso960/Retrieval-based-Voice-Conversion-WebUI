@@ -105,6 +105,12 @@ pip install -r requirements.txt
 | `uvr5_weights/` (폴더 전체) | `assets/uvr5_weights/` |
 | `rmvpe.pt` | 루트 디렉토리 |
 
+**추론 테스트를 하려면 음색 모델이 별도로 필요합니다**
+
+- 음색 모델(.pth)은 `assets/weights/`에 배치
+- 직접 훈련(훈련 탭)하거나 커뮤니티에서 공개된 모델을 받아서 넣어야 함
+- `assets/pretrained_v2/`의 모델은 훈련용 베이스 모델로 음색 모델과 다름
+
 **Windows 사용자 — ffmpeg 배치**
 
 - [ffmpeg.exe 다운로드](https://huggingface.co/lj1995/VoiceConversionWebUI/blob/main/ffmpeg.exe)
