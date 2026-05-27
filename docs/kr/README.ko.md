@@ -63,180 +63,73 @@ VITS 기반의 간단하고 사용하기 쉬운 음성 변환 프레임워크.<b
 
 ## 환경 설정
 
-다음 명령은 Python 버전이 3.8 이상인 환경에서 실행해야 합니다.
+### 사전 요구사항
 
-### Windows/Linux/MacOS 등 플랫폼 공통 방법
+- Python 3.11 이상
+- Git
+- Nvidia GPU 권장 (CUDA 11.8 이상), CPU로도 실행 가능하나 속도 저하 있음
+- Visual C++ Build Tools (Windows 필수) — https://visualstudio.microsoft.com/visual-cpp-build-tools/
 
-아래 방법 중 하나를 선택하세요.
-
-#### 1. pip를 통한 의존성 설치
-
-1. Pytorch 및 의존성 모듈 설치, 이미 설치되어 있으면 생략. 참조: https://pytorch.org/get-started/locally/
+### 1. 저장소 클론
 
 ```bash
-pip install torch torchvision torchaudio
+git clone https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI.git
+cd Retrieval-based-Voice-Conversion-WebUI
 ```
 
-2. win 시스템 + Nvidia Ampere 아키텍처(RTX30xx) 사용 시, #21의 사례에 따라 pytorch에 해당하는 cuda 버전을 지정
+### 2. 의존성 설치
+
+**Nvidia GPU (CUDA 11.8) 사용 시**
 
 ```bash
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
-```
-
-3. 자신의 그래픽 카드에 맞는 의존성 설치
-
-- N카드
-
-```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 pip install -r requirements.txt
 ```
 
-- A카드/I카드
+**CPU만 사용하는 경우**
 
 ```bash
-pip install -r requirements-dml.txt
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+pip install -r requirements.txt
 ```
 
-- A카드ROCM(Linux)
+### 3. 사전 훈련 모델 다운로드
 
-```bash
-pip install -r requirements-amd.txt
-```
+[Hugging Face](https://huggingface.co/lj1995/VoiceConversionWebUI/tree/main/)에서 아래 파일을 다운로드하여 지정 경로에 배치하세요.
 
-- I카드IPEX(Linux)
+| 파일 | 배치 경로 |
+|------|-----------|
+| `hubert_base.pt` | `assets/hubert/` |
+| `pretrained/` (폴더 전체) | `assets/pretrained/` |
+| `pretrained_v2/` (폴더 전체) | `assets/pretrained_v2/` |
+| `uvr5_weights/` (폴더 전체) | `assets/uvr5_weights/` |
+| `rmvpe.pt` | 루트 디렉토리 |
 
-```bash
-pip install -r requirements-ipex.txt
-```
-
-#### 2. poetry를 통한 의존성 설치
-
-Poetry 의존성 관리 도구 설치, 이미 설치된 경우 생략. 참조: https://python-poetry.org/docs/#installation
-
-```bash
-curl -sSL https://install.python-poetry.org | python3 -
-```
-
-poetry를 통한 의존성 설치
-
-```bash
-poetry install
-```
-
-### MacOS
-
-`run.sh`를 통해 의존성 설치 가능
-
-```bash
-sh ./run.sh
-```
-
-## 기타 사전 훈련된 모델 준비
-
-RVC는 추론과 훈련을 위해 다른 일부 사전 훈련된 모델이 필요합니다.
-
-이러한 모델은 저희의 [Hugging Face space](https://huggingface.co/lj1995/VoiceConversionWebUI/tree/main/)에서 다운로드할 수 있습니다.
-
-### 1. assets 다운로드
-
-다음은 RVC에 필요한 모든 사전 훈련된 모델과 기타 파일의 목록입니다. `tools` 폴더에서 이들을 다운로드하는 스크립트를 찾을 수 있습니다.
-
-- ./assets/hubert/hubert_base.pt
-
-- ./assets/pretrained
-
-- ./assets/uvr5_weights
-
-v2 버전 모델을 사용하려면 추가로 다음을 다운로드해야 합니다.
-
-- ./assets/pretrained_v2
-
-### 2. ffmpeg 설치
-
-ffmpeg와 ffprobe가 이미 설치되어 있다면 건너뜁니다.
-
-#### Ubuntu/Debian 사용자
-
-```bash
-sudo apt install ffmpeg
-```
-
-#### MacOS 사용자
-
-```bash
-brew install ffmpeg
-```
-
-#### Windows 사용자
-
-다운로드 후 루트 디렉토리에 배치.
+**Windows 사용자 — ffmpeg 배치**
 
 - [ffmpeg.exe 다운로드](https://huggingface.co/lj1995/VoiceConversionWebUI/blob/main/ffmpeg.exe)
-
 - [ffprobe.exe 다운로드](https://huggingface.co/lj1995/VoiceConversionWebUI/blob/main/ffprobe.exe)
 
-### 3. RMVPE 인간 음성 피치 추출 알고리즘에 필요한 파일 다운로드
+두 파일을 저장소 루트 디렉토리에 배치하세요.
 
-최신 RMVPE 인간 음성 피치 추출 알고리즘을 사용하려면 음피치 추출 모델 매개변수를 다운로드하고 RVC 루트 디렉토리에 배치해야 합니다.
+### 4. 실행
 
-- [rmvpe.pt 다운로드](https://huggingface.co/lj1995/VoiceConversionWebUI/blob/main/rmvpe.pt)
+**WebUI**
 
-#### dml 환경의 RMVPE 다운로드(선택사항, A카드/I카드 사용자)
-
-- [rmvpe.onnx 다운로드](https://huggingface.co/lj1995/VoiceConversionWebUI/blob/main/rmvpe.onnx)
-
-### 4. AMD 그래픽 카드 Rocm(선택사항, Linux만 해당)
-
-Linux 시스템에서 AMD의 Rocm 기술을 기반으로 RVC를 실행하려면 [여기](https://rocm.docs.amd.com/en/latest/deploy/linux/os-native/install.html)에서 필요한 드라이버를 먼저 설치하세요.
-
-Arch Linux를 사용하는 경우 pacman을 사용하여 필요한 드라이버를 설치할 수 있습니다.
-
-```
-pacman -S rocm-hip-sdk rocm-opencl-sdk
+```bat
+go-web.bat
 ```
 
-일부 모델의 그래픽 카드(예: RX6700XT)의 경우, 다음과 같은 환경 변수를 추가로 설정해야 할 수 있습니다.
+**실시간 음성 변환 GUI**
 
-```
-export ROCM_PATH=/opt/rocm
-export HSA_OVERRIDE_GFX_VERSION=10.3.0
-```
-
-동시에 현재 사용자가 `render` 및 `video` 사용자 그룹에 속해 있는지 확인하세요.
-
-```
-sudo usermod -aG render $USERNAME
-sudo usermod -aG video $USERNAME
-```
-
-## 시작하기
-
-### 직접 시작
-
-다음 명령어로 WebUI를 시작하세요
+실행 전 아래 패키지를 추가로 설치하세요.
 
 ```bash
-python infer-web.py
+pip install FreeSimpleGUI "sounddevice<0.5.0"
 ```
 
-### 통합 패키지 사용
-
-`RVC-beta.7z`를 다운로드하고 압축 해제
-
-#### Windows 사용자
-
-`go-web.bat` 더블 클릭
-
-#### MacOS 사용자
-
-```bash
-sh ./run.sh
-```
-
-### IPEX 기술이 필요한 I카드 사용자를 위한 지침(Linux만 해당)
-
-```bash
-source /opt/intel/oneapi/setvars.sh
+```bat
+go-realtime-gui.bat
 ```
 
 ## 참조 프로젝트
