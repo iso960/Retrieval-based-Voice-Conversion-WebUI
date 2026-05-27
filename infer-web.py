@@ -1107,12 +1107,12 @@ with gr.Blocks(
                 with gr.Row():
                     with gr.Column():
                         dir_wav_input = gr.Textbox(
-                            label=i18n("输入待处理音频文件夹路径"),
+                            label=i18n("처리할 오디오 폴더 경로"),
                             placeholder="C:\\Users\\Desktop\\todo-songs",
                         )
                         wav_inputs = gr.File(
                             file_count="multiple",
-                            label=i18n("也可批量输入音频文件, 二选一, 优先读文件夹"),
+                            label=i18n("오디오 파일 직접 업로드 (폴더와 중복 시 폴더 우선)"),
                         )
                     with gr.Column():
                         model_choose = gr.Dropdown(
@@ -1128,32 +1128,33 @@ with gr.Blocks(
                             visible=False,  # 先不开放调整
                         )
                         opt_vocal_root = gr.Textbox(
-                            label=i18n("指定输出主人声文件夹"), value="opt"
+                            label=i18n("보컬 출력 폴더"), value="opt"
                         )
                         opt_ins_root = gr.Textbox(
-                            label=i18n("指定输出非主人声文件夹"), value="opt"
+                            label=i18n("반주 출력 폴더"), value="opt"
                         )
                         format0 = gr.Radio(
-                            label=i18n("导出文件格式"),
+                            label=i18n("출력 파일 형식"),
                             choices=["wav", "flac", "mp3", "m4a"],
                             value="flac",
                             interactive=True,
                         )
+                with gr.Row():
                     but2 = gr.Button(i18n("转换"), variant="primary")
-                    vc_output4 = gr.Textbox(label=i18n("输出信息"))
-                    but2.click(
-                        uvr,
-                        [
-                            model_choose,
-                            dir_wav_input,
-                            opt_vocal_root,
-                            wav_inputs,
-                            opt_ins_root,
-                            agg,
-                            format0,
-                        ],
-                        [vc_output4],
-                    )
+                    vc_output4 = gr.Textbox(label=i18n("输出信息"), lines=5)
+                but2.click(
+                    uvr,
+                    [
+                        model_choose,
+                        dir_wav_input,
+                        opt_vocal_root,
+                        wav_inputs,
+                        opt_ins_root,
+                        agg,
+                        format0,
+                    ],
+                    [vc_output4],
+                )
         with gr.TabItem(i18n("训练")):
             gr.Markdown(
                 value=i18n(
