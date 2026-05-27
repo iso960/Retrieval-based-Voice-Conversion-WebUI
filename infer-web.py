@@ -773,6 +773,61 @@ def change_f0_method(f0method8):
     return gr.update(visible=visible)
 
 
+def parse_train_params_from_excel(file):
+    try:
+        import openpyxl
+    except ImportError:
+        return ("openpyxl 미설치. pip install openpyxl 후 재시작 필요.",) + (gr.update(),) * 9
+
+    if file is None:
+        return ("파일이 선택되지 않았습니다.",) + (gr.update(),) * 9
+
+    try:
+        wb = openpyxl.load_workbook(file, data_only=True)
+    except Exception as e:
+        return (f"파일 열기 실패: {e}",) + (gr.update(),) * 9
+
+    sheet_name = "훈련 파라미터"
+    if sheet_name not in wb.sheetnames:
+        return (
+            f"'{sheet_name}' 시트를 찾을 수 없습니다. 시트명: {wb.sheetnames}",
+        ) + (gr.update(),) * 9
+
+    ws = wb[sheet_name]
+
+    def cell_val(row):
+        v = ws.cell(row=row, column=5).value  # E열
+        if v is None or str(v).strip() == "":
+            v = ws.cell(row=row, column=4).value  # D열 fallback
+        return v
+
+    try:
+        v2 = cell_val(2)
+        v3 = cell_val(3)
+        v4 = cell_val(4)
+        v5 = cell_val(5)
+        v6 = cell_val(6)
+        v7 = cell_val(7)
+        v8 = cell_val(8)
+        v9 = cell_val(9)
+        v10 = cell_val(10)
+    except Exception as e:
+        return (f"파라미터 파싱 오류: {e}",) + (gr.update(),) * 9
+
+    return (
+        "파라미터 적용 완료.",
+        gr.update(value=int(v2)) if v2 is not None else gr.update(),
+        gr.update(value=int(v3)) if v3 is not None else gr.update(),
+        gr.update(value=str(v4)) if v4 is not None else gr.update(),
+        gr.update(value=int(v5)) if v5 is not None else gr.update(),
+        gr.update(value=str(v6)) if v6 is not None else gr.update(),
+        gr.update(value=float(v7)) if v7 is not None else gr.update(),
+        gr.update(value=float(v8)) if v8 is not None else gr.update(),
+        gr.update(value=str(v9)) if v9 is not None else gr.update(),
+        gr.update(value=str(v10)) if v10 is not None else gr.update(),
+    )
+
+
 with gr.Blocks(
     title="RVC WebUI",
     css="""
@@ -1156,6 +1211,16 @@ with gr.Blocks(
                     [vc_output4],
                 )
         with gr.TabItem(i18n("训练")):
+            with gr.Row():
+                excel_file = gr.File(
+                    label="엑셀 파라미터 업로드 (.xlsx)",
+                    file_count="single",
+                    file_types=[".xlsx"],
+                )
+                apply_excel_btn = gr.Button("파라미터 적용", variant="primary")
+                excel_status = gr.Textbox(
+                    label="적용 결과", value="", interactive=False
+                )
             gr.Markdown(
                 value=i18n(
                     "step1: 填写实验配置. 实验数据放在logs下, 每个实验一个文件夹, 需手工输入实验名路径, 内含实验配置, 日志, 训练得到的模型文件. "
@@ -1331,6 +1396,22 @@ with gr.Blocks(
                         label=i18n("加载预训练底模D路径"),
                         value="assets/pretrained_v2/f0D40k.pth",
                         interactive=True,
+                    )
+                    apply_excel_btn.click(
+                        parse_train_params_from_excel,
+                        inputs=[excel_file],
+                        outputs=[
+                            excel_status,
+                            total_epoch11,
+                            batch_size12,
+                            sr2,
+                            if_f0_3,
+                            f0method8,
+                            index_rate1,
+                            protect0,
+                            pretrained_G14,
+                            pretrained_D15,
+                        ],
                     )
                     sr2.change(
                         change_sr2,

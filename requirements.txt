@@ -53,3 +53,4 @@ torchfcpe
 ffmpy==0.3.1
 python-dotenv>=1.0.0
 av
+openpyxl>=3.1.0
