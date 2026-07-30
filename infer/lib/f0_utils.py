@@ -27,9 +27,9 @@ def mel_quantize(
     else:
         f0_mel = 1127 * np.log(1 + f0 / 700)
 
-    f0_mel[f0_mel > 0] = (
-        (f0_mel[f0_mel > 0] - f0_mel_min) * 254 / (f0_mel_max - f0_mel_min) + 1
-    )
+    f0_mel[f0_mel > 0] = (f0_mel[f0_mel > 0] - f0_mel_min) * 254 / (
+        f0_mel_max - f0_mel_min
+    ) + 1
     f0_mel[f0_mel <= 1] = 1
     f0_mel[f0_mel > 255] = 255
 

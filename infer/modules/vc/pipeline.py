@@ -122,7 +122,9 @@ class Pipeline(object):
                 f0 = signal.medfilt(f0, 3)
         elif f0_method == "crepe":
             audio = torch.tensor(np.copy(x))[None].float()
-            f0 = extract_f0_crepe(audio, device=self.device, f0_min=f0_min, f0_max=f0_max)
+            f0 = extract_f0_crepe(
+                audio, device=self.device, f0_min=f0_min, f0_max=f0_max
+            )
             f0 = f0[0].cpu().numpy()
         elif f0_method == "rmvpe":
             f0 = extract_f0_rmvpe(

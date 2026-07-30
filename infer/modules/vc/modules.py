@@ -231,7 +231,9 @@ class VC:
                 if "Success" in info:
                     try:
                         tgt_sr, audio_opt = opt
-                        self._save_audio(audio_opt, tgt_sr, opt_root, input_path, format1)
+                        self._save_audio(
+                            audio_opt, tgt_sr, opt_root, input_path, format1
+                        )
                     except Exception:
                         info += traceback.format_exc()
                 infos.append("%s->%s" % (os.path.basename(input_path), info))

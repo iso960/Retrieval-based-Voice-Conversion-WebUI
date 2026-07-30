@@ -24,19 +24,23 @@ import gradio_client.utils as _gc_utils
 
 _orig_get_type = _gc_utils.get_type
 
+
 def _patched_get_type(schema):
     if isinstance(schema, bool):
         return "Any"
     return _orig_get_type(schema)
 
+
 _gc_utils.get_type = _patched_get_type
 
 _orig_j2p = _gc_utils._json_schema_to_python_type
+
 
 def _patched_j2p(schema, defs):
     if isinstance(schema, bool):
         return "Any"
     return _orig_j2p(schema, defs)
+
 
 _gc_utils._json_schema_to_python_type = _patched_j2p
 
@@ -52,7 +56,6 @@ import traceback
 import threading
 import shutil
 import logging
-
 
 logging.getLogger("numba").setLevel(logging.WARNING)
 logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -556,16 +559,26 @@ def click_train(
     cmd = [
         config.python_cmd,
         "infer/modules/train/train.py",
-        "-e", exp_dir1,
-        "-sr", sr2,
-        "-f0", str(1 if if_f0_3 else 0),
-        "-bs", str(batch_size12),
-        "-te", str(total_epoch11),
-        "-se", str(save_epoch10),
-        "-l", str(1 if if_save_latest13 == i18n("是") else 0),
-        "-c", str(1 if if_cache_gpu17 == i18n("是") else 0),
-        "-sw", str(1 if if_save_every_weights18 == i18n("是") else 0),
-        "-v", version19,
+        "-e",
+        exp_dir1,
+        "-sr",
+        sr2,
+        "-f0",
+        str(1 if if_f0_3 else 0),
+        "-bs",
+        str(batch_size12),
+        "-te",
+        str(total_epoch11),
+        "-se",
+        str(save_epoch10),
+        "-l",
+        str(1 if if_save_latest13 == i18n("是") else 0),
+        "-c",
+        str(1 if if_cache_gpu17 == i18n("是") else 0),
+        "-sw",
+        str(1 if if_save_every_weights18 == i18n("是") else 0),
+        "-v",
+        version19,
     ]
     if gpus16:
         cmd += ["-g", str(gpus16)]
@@ -777,7 +790,9 @@ def parse_train_params_from_excel(file):
     try:
         import openpyxl
     except ImportError:
-        return ("openpyxl 미설치. pip install openpyxl 후 재시작 필요.",) + (gr.update(),) * 9
+        return ("openpyxl 미설치. pip install openpyxl 후 재시작 필요.",) + (
+            gr.update(),
+        ) * 9
 
     if file is None:
         return ("파일이 선택되지 않았습니다.",) + (gr.update(),) * 9
@@ -789,9 +804,9 @@ def parse_train_params_from_excel(file):
 
     sheet_name = "훈련 파라미터"
     if sheet_name not in wb.sheetnames:
-        return (
-            f"'{sheet_name}' 시트를 찾을 수 없습니다. 시트명: {wb.sheetnames}",
-        ) + (gr.update(),) * 9
+        return (f"'{sheet_name}' 시트를 찾을 수 없습니다. 시트명: {wb.sheetnames}",) + (
+            gr.update(),
+        ) * 9
 
     ws = wb[sheet_name]
 
@@ -845,11 +860,15 @@ with gr.Blocks(
     with gr.Tabs():
         with gr.TabItem(i18n("模型推理")):
             with gr.Row():
-                sid0 = gr.Dropdown(label=i18n("推理音色"), choices=sorted(names), scale=6)
+                sid0 = gr.Dropdown(
+                    label=i18n("推理音色"), choices=sorted(names), scale=6
+                )
                 refresh_button = gr.Button(
                     i18n("刷新音色列表和索引路径"), variant="primary", scale=2
                 )
-                clean_button = gr.Button(i18n("卸载音色省显存"), variant="primary", scale=2)
+                clean_button = gr.Button(
+                    i18n("卸载音色省显存"), variant="primary", scale=2
+                )
                 spk_item = gr.Slider(
                     minimum=0,
                     maximum=2333,
@@ -859,9 +878,7 @@ with gr.Blocks(
                     visible=False,
                     interactive=True,
                 )
-                clean_button.click(
-                    fn=clean, inputs=[], outputs=[sid0]
-                )
+                clean_button.click(fn=clean, inputs=[], outputs=[sid0])
             with gr.TabItem(i18n("单次推理")):
                 with gr.Group():
                     with gr.Row():
@@ -905,7 +922,9 @@ with gr.Blocks(
                             resample_sr0 = gr.Slider(
                                 minimum=0,
                                 maximum=48000,
-                                label=i18n("출력 음질 리샘플링 — 0으로 설정하면 원본 유지"),
+                                label=i18n(
+                                    "출력 음질 리샘플링 — 0으로 설정하면 원본 유지"
+                                ),
                                 value=0,
                                 step=1,
                                 interactive=True,
@@ -942,7 +961,9 @@ with gr.Blocks(
                             index_rate1 = gr.Slider(
                                 minimum=0,
                                 maximum=1,
-                                label=i18n("인덱스 반영 비율 — 높을수록 학습된 음색 특징을 더 강하게 반영"),
+                                label=i18n(
+                                    "인덱스 반영 비율 — 높을수록 학습된 음색 특징을 더 강하게 반영"
+                                ),
                                 value=0.75,
                                 interactive=True,
                             )
@@ -965,7 +986,9 @@ with gr.Blocks(
                             # )
                 with gr.Group():
                     with gr.Column():
-                        but0 = gr.Button(i18n("转换"), variant="primary", scale=1, min_width=120)
+                        but0 = gr.Button(
+                            i18n("转换"), variant="primary", scale=1, min_width=120
+                        )
                         with gr.Row():
                             vc_output1 = gr.Textbox(label=i18n("输出信息"), lines=5)
                             vc_output2 = gr.Audio(
@@ -1087,7 +1110,9 @@ with gr.Blocks(
                         index_rate2 = gr.Slider(
                             minimum=0,
                             maximum=1,
-                            label=i18n("인덱스 반영 비율 — 높을수록 학습된 음색 특징을 더 강하게 반영"),
+                            label=i18n(
+                                "인덱스 반영 비율 — 높을수록 학습된 음색 특징을 더 강하게 반영"
+                            ),
                             value=1,
                             interactive=True,
                         )
@@ -1104,7 +1129,9 @@ with gr.Blocks(
                     )
 
                 with gr.Row():
-                    but1 = gr.Button(i18n("转换"), variant="primary", scale=1, min_width=120)
+                    but1 = gr.Button(
+                        i18n("转换"), variant="primary", scale=1, min_width=120
+                    )
                     vc_output3 = gr.Textbox(label=i18n("输出信息"))
 
                     but1.click(
@@ -1128,6 +1155,7 @@ with gr.Blocks(
                         ],
                         [vc_output3],
                     )
+
                 def _change_voice(sid, protect0_val, protect1_val):
                     result = vc.get_vc(sid)
                     if result is None:
@@ -1141,8 +1169,14 @@ with gr.Blocks(
                     n_spk, tgt_sr, if_f0, version, index_path = result
                     return (
                         gr.update(visible=True, maximum=n_spk),
-                        gr.update(visible=if_f0 != 0, value=protect0_val if if_f0 != 0 else 0.5),
-                        gr.update(visible=if_f0 != 0, value=protect1_val if if_f0 != 0 else 0.33),
+                        gr.update(
+                            visible=if_f0 != 0,
+                            value=protect0_val if if_f0 != 0 else 0.5,
+                        ),
+                        gr.update(
+                            visible=if_f0 != 0,
+                            value=protect1_val if if_f0 != 0 else 0.33,
+                        ),
                         gr.update(value=index_path),
                         gr.update(value=index_path),
                     )
@@ -1167,7 +1201,9 @@ with gr.Blocks(
                         )
                         wav_inputs = gr.File(
                             file_count="multiple",
-                            label=i18n("오디오 파일 직접 업로드 (폴더와 중복 시 폴더 우선)"),
+                            label=i18n(
+                                "오디오 파일 직접 업로드 (폴더와 중복 시 폴더 우선)"
+                            ),
                         )
                     with gr.Column():
                         model_choose = gr.Dropdown(
@@ -1652,9 +1688,7 @@ with gr.Blocks(
                 butOnnx = gr.Button(i18n("导出Onnx模型"), variant="primary")
             with gr.Row():
                 infoOnnx = gr.Textbox(label=i18n("출력 정보"), interactive=False)
-            butOnnx.click(
-                export_onnx, [ckpt_dir, onnx_dir], infoOnnx
-            )
+            butOnnx.click(export_onnx, [ckpt_dir, onnx_dir], infoOnnx)
 
         tab_faq = i18n("常见问题解答")
         with gr.TabItem(tab_faq):

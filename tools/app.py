@@ -41,11 +41,9 @@ app = gr.Blocks()
 with app:
     with gr.Tabs():
         with gr.TabItem("在线demo"):
-            gr.Markdown(
-                value="""
+            gr.Markdown(value="""
                 RVC 在线demo
-                """
-            )
+                """)
             sid = gr.Dropdown(label=i18n("推理音色"), choices=sorted(names))
             with gr.Column():
                 spk_item = gr.Slider(
@@ -57,6 +55,7 @@ with app:
                     visible=False,
                     interactive=True,
                 )
+
             def _change_voice(sid):
                 result = vc.get_vc(sid)
                 if result is None:
